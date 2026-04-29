@@ -541,17 +541,18 @@ class UniDriveVLAB2DAgent(autonomous_agent.AutonomousAgent):
                 inputs[key] = inputs[key].to(self.device)
 
         # Run model - UniDriveVLA uses the same interface
-        outputs = self.model(
-            img=inputs['img'],
-            img_metas=inputs['img_metas'],
-            projection_mat=inputs['projection_mat'],
-            ego_status=inputs.get('ego_status'),
-            gt_ego_fut_cmd=inputs['gt_ego_fut_cmd'],
-            image_wh=inputs['image_wh'],
-            timestamp=inputs['timestamp'],
-            rescale=True,
-            return_loss=False,
-        )
+        with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+            outputs = self.model(
+                img=inputs['img'],
+                img_metas=inputs['img_metas'],
+                projection_mat=inputs['projection_mat'],
+                ego_status=inputs.get('ego_status'),
+                gt_ego_fut_cmd=inputs['gt_ego_fut_cmd'],
+                image_wh=inputs['image_wh'],
+                timestamp=inputs['timestamp'],
+                rescale=True,
+                return_loss=False,
+            )
 
         # control - aligned with HiP-AD
         plan_temp_name = 'plan_speed_5hz'
